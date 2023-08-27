@@ -4,6 +4,8 @@ import datetime
 import pytz
 from telegram import Update, Chat
 from telegram.ext import Application, CommandHandler, MessageHandler, CallbackContext, filters, ChatMemberHandler
+from dotenv import load_dotenv
+import os
 
 # Set up logging
 logging.basicConfig(
@@ -11,6 +13,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Initialize the MongoDB client
+
+
 def initialize_db():
     client = pymongo.MongoClient("mongodb://127.0.0.1:27017/")
     db = client["training_bot"]
@@ -19,10 +23,14 @@ def initialize_db():
     return db
 
 # Command to start the bot
+
+
 async def start(update: Update, context: CallbackContext) -> None:
     await update.message.reply_text("Welcome to the training sign-up bot! Use /signup to register for a training.")
 
 # Command to add a new training
+
+
 async def new_training(update: Update, context: CallbackContext) -> None:
     await update.message.reply_text("Please provide details for the new training in the following format:\n"
                                     "Type, Date and Time (YYYY-MM-DD HH:MM), Address, Holding (In person/Remote), Holder")
@@ -37,9 +45,13 @@ async def signup(update: Update, context: CallbackContext) -> None:
 
 
 async def training_details(update: Update, context: CallbackContext) -> None:
+    chat = update.effective_chat
+    if chat.type != Chat.PRIVATE:
+        return
+    
     if 'waiting_for_signup' in context.user_data and context.user_data['waiting_for_signup']:
         # context.user_data['waiting_for_signup']
-        
+
         message_text = update.message.text
         # Process the message text to determine criteria for filtering trainings
         # You can use if-else statements or a more sophisticated approach here
@@ -59,7 +71,7 @@ async def training_details(update: Update, context: CallbackContext) -> None:
                 response += f"Holding: {training['holding']}\n"
                 response += f"Holder: {training['holder']}\n\n"
             await update.message.reply_text(response)
-            
+
         else:
             await update.message.reply_text("No trainings found that match your criteria.")
     elif 'waiting_for_new_training' in context.user_data and context.user_data['waiting_for_new_training']:
@@ -142,7 +154,7 @@ async def selected_training(update: Update, context: CallbackContext) -> None:
     chat = update.effective_chat
     if chat.type != Chat.PRIVATE:
         return
-    
+
     if 'waiting_for_signup' in context.user_data and context.user_data['waiting_for_signup']:
         context.user_data['waiting_for_signup'] = False
 
@@ -168,6 +180,8 @@ async def selected_training(update: Update, context: CallbackContext) -> None:
         await update.message.reply_text("Please use /signup to register for a training.")
 
 # Function to announce upcoming trainings
+
+
 async def announce_trainings(update: Update, context: CallbackContext) -> None:
     db = initialize_db()
     trainings_collection = db["trainings"]
@@ -184,9 +198,9 @@ async def announce_trainings(update: Update, context: CallbackContext) -> None:
             response += f"Date and Time: {training['datetime']}\n"
             response += f"Address: {training['address']}\n"
             response += f"Holding: {training['holding']}\n"
-            #response += f"Holder: {training['holder']}\n\n"
+            # response += f"Holder: {training['holder']}\n\n"
             response += "\n"
-            
+
         response += "\nSignup for those trainings by sending me /signup in private chat, and then following instructions"
         await context.bot.send_message(chat_id='-1001988401379', text=response)
     else:
@@ -194,6 +208,8 @@ async def announce_trainings(update: Update, context: CallbackContext) -> None:
             chat_id='-1001988401379', text="No upcoming trainings.")
 
 # Command to send a message to registered participants
+
+
 async def send_message_to_participants(update: Update, context: CallbackContext) -> None:
     await update.message.reply_text("Please specify the training type for which you want to send a message to participants:")
     context.user_data['waiting_for_message_type'] = True
@@ -245,6 +261,8 @@ async def send_message(update: Update, context: CallbackContext) -> None:
         await update.message.reply_text("Please select a training type using /send_message_to_participants first.")
 
 # Handler for saving received messages
+
+
 async def save_message(update: Update, context: CallbackContext) -> None:
     if update.message.text:
         db = initialize_db()
@@ -258,20 +276,20 @@ async def save_message(update: Update, context: CallbackContext) -> None:
         }
 
         messages_collection.insert_one(new_message)
-    
-    if "waiting_for_signup" in context.user_data and context.user_data["waiting_for_signup"]: #or "waiting_for_new_training" in context.user_data and context.user_data['waiting_for_new_training']:
+
+    # or "waiting_for_new_training" in context.user_data and context.user_data['waiting_for_new_training']:
+    if "waiting_for_signup" in context.user_data and context.user_data["waiting_for_signup"]:
         await selected_training(update, context)
-        
+
     if 'waiting_for_message_type' in context.user_data and context.user_data['waiting_for_message_type']:
         await selected_message_type(update, context)
-        
+
     if 'selected_training_for_message' in context.user_data and context.user_data['selected_training_for_message']:
         await send_message(update, context)
-        
+
     if 'waiting_for_new_training' in context.user_data and context.user_data['waiting_for_new_training']:
         await training_details(update, context)
-        
-    
+
 
 # Handler for saving member changes in rooms
 async def save_member_change(update: Update, context: CallbackContext) -> None:
@@ -288,10 +306,11 @@ async def save_member_change(update: Update, context: CallbackContext) -> None:
 
         member_changes_collection.insert_one(new_member_change)
 
-def main():
+
+def main(token):
     # Replace 'YOUR_BOT_TOKEN' with your actual bot token
     application = Application.builder().token(
-        "TOKEN").build()
+        token).build()
 
     # Command handlers
     application.add_handler(CommandHandler('start', start))
@@ -305,32 +324,31 @@ def main():
         'send_message', send_message))  # New command
     application.add_handler(CommandHandler('announce', announce_trainings))
 
-       # Handle members joining/leaving chats.
-    application.add_handler(ChatMemberHandler(save_member_change, ChatMemberHandler.CHAT_MEMBER))
-    application.add_handler(ChatMemberHandler(save_member_change, ChatMemberHandler.MY_CHAT_MEMBER))
-
+    # Handle members joining/leaving chats.
+    application.add_handler(ChatMemberHandler(
+        save_member_change, ChatMemberHandler.CHAT_MEMBER))
+    application.add_handler(ChatMemberHandler(
+        save_member_change, ChatMemberHandler.MY_CHAT_MEMBER))
 
     # Message handler for training details
-    application.add_handler(MessageHandler(filters.TEXT, save_message))  # New handler for saving messages
+    # New handler for saving messages
+    application.add_handler(MessageHandler(filters.TEXT, save_message))
 
     application.add_handler(MessageHandler(
         filters.TEXT & ~filters.COMMAND, selected_training))  # New handler
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, training_details))
+    application.add_handler(MessageHandler(
+        filters.TEXT & ~filters.COMMAND, training_details))
 
     application.add_handler(MessageHandler(
         filters.TEXT & ~filters.COMMAND, send_message))  # New handler
-    
-
-    
-
 
     # Schedule the weekly training announcement
     job_queue = application.job_queue
     # 604800 seconds = 1 week
-    
+
     weeks = 7
     days = 0 + weeks*7
-    hours = 0 + days*24    
+    hours = 0 + days*24
     minutes = 0 + hours*60
     seconds = 0 + minutes*60
 
@@ -341,4 +359,9 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    # Load environment variables from the .env file
+    load_dotenv()
+
+    # Fetch the bot token from the environment variable
+    bot_token = os.environ.get('TOKEN')
+    main(bot_token)
