@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    /* Additional styles for the sign-up page */
+    .container {
+        margin-top: 40px;
+    }
+
+    .heading {
+        font-size: 32px;
+        text-align: center;
+        color: #3498db;
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 5px;
+        border: 2px solid #3498db;
+        border-radius: 6px;
+        transition: border-color 0.2s;
+        font-size: 16px;
+    }
+
+    .form-input:focus {
+        border-color: #2980b9;
+        outline: none;
+    }
+
+    .button {
+        display: inline-block;
+        padding: 12px 24px;
+        background-color: #3498db;
+        color: #ffffff;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.2s;
+        text-decoration: none;
+        margin-right: 10px;
+    }
+
+    .button:hover {
+        background-color: #2980b9;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="heading">Sign Up for Training</h1>
+    <div class="form-group">
+        <form action="{{ url_for('signup') }}" method="POST">
+            <input type="hidden" name="training_id" value="{{ training._id }}">
+            <label class="form-label" for="name">First Name</label>
+            <input class="form-input" type="text" id="name" name="name" required>
+            <br><br>
+            <label class="form-label" for="last_name">Last Name</label>
+            <input class="form-input" type="text" id="last_name" name="last_name" required>
+            <br><br>
+            <label class="form-label" for="email">Email</label>
+            <input class="form-input" type="email" id="email" name="email" required>
+            <br><br>
+            <label class="form-label" for="phone">Phone Number</label>
+            <input class="form-input" type="tel" id="phone" name="phone" required>
+            <br><br>
+            <button class="button" type="submit">Sign Up</button>
+        </form>
+    </div>
+    <a class="button" href="{{ url_for('index') }}">Back to Trainings</a>
+</div>
+{% endblock %}

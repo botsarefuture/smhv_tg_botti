@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    /* Additional styles for the sign-up confirmation page */
+    .container {
+        margin-top: 40px;
+    }
+
+    .text-center {
+        text-align: center;
+        color: #3498db;
+        font-size: 32px;
+        margin-bottom: 20px;
+    }
+
+    .confirmation-details {
+        margin-bottom: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center">Sign Up Confirmation</h1>
+    <p>Thank you for signing up for {{ training.type }}!</p>
+    <div class="confirmation-details">
+        <p><strong>Name:</strong> {{ user_registration.user_data.name }} {{ user_registration.user_data.last_name }}</p>
+        <p><strong>Email:</strong> {{ user_registration.user_data.email }}</p>
+        <p><strong>Phone Number:</strong> {{ user_registration.user_data.phone }}</p>
+        <p><strong>Date and Time:</strong> {{ training.datetime }}</p>
+        <p><strong>Address:</strong> {{ training.address }}</p>
+        <p><strong>Holding:</strong> {{ training.holding }}</p>
+        <p><strong>Holder:</strong> {{ training.holder }}</p>
+    </div>
+</div>
+{% endblock %}

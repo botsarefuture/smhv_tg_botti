@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1 class="heading">New Training</h1>
+    <form action="{{ url_for('new_training') }}" method="post">
+        <div class="form-group">
+            <label for="training_type" class="form-label">Training Type:</label>
+            <input type="text" name="training_type" class="form-input" required>
+        </div>
+        <div class="form-group">
+            <label for="date_time" class="form-label">Date and Time (YYYY-MM-DD HH:MM):</label>
+            <input type="text" name="date_time" class="form-input" required>
+        </div>
+        <div class="form-group">
+            <label for="address" class="form-label">Address:</label>
+            <input type="text" name="address" class="form-input" required>
+        </div>
+        <div class="form-group">
+            <label for="holding" class="form-label">Holding (In person/Remote):</label>
+            <input type="text" name="holding" class="form-input" required>
+        </div>
+        <div class="form-group">
+            <label for="holder" class="form-label">Holder:</label>
+            <input type="text" name="holder" class="form-input" required>
+        </div>
+        <button type="submit" class="button">Add Training</button>
+    </form>
+    <p><a href="{{ url_for('index') }}" class="back-link">Back to Trainings</a></p>
+</div>
+{% endblock %}
