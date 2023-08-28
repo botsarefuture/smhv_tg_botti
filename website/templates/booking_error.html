@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-message">
+        An error has occurred. Please try again later.
+    </div>
+    <a href="/" class="back-link">Back to Home</a>
+</div>
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    /* Additional styles for the error page */
+    .error-container {
+        text-align: center;
+        padding: 50px;
+    }
+
+    .error-message {
+        font-size: 24px;
+        color: red;
+        margin-bottom: 20px;
+    }
+
+    .back-link {
+        display: inline-block;
+        padding: 12px 24px;
+        background-color: #3498db;
+        color: #ffffff;
+        border: none;
+        border-radius: 6px;
+        text-decoration: none;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.2s;
+    }
+
+    .back-link:hover {
+        background-color: #2980b9;
+    }
+</style>
+{% endblock %}
